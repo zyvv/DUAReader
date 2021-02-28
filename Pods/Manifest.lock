@@ -1,0 +1,62 @@
+PODS:
+  - AsyncSwift (2.0.4)
+  - Defaults (4.1.0)
+  - DTCoreText (1.6.25):
+    - DTCoreText/Core (= 1.6.25)
+    - DTFoundation/Core (~> 1.7.5)
+    - DTFoundation/DTAnimatedGIF (~> 1.7.5)
+    - DTFoundation/DTHTMLParser (~> 1.7.5)
+    - DTFoundation/UIKit (~> 1.7.5)
+  - DTCoreText/Core (1.6.25):
+    - DTFoundation/Core (~> 1.7.5)
+    - DTFoundation/DTAnimatedGIF (~> 1.7.5)
+    - DTFoundation/DTHTMLParser (~> 1.7.5)
+    - DTFoundation/UIKit (~> 1.7.5)
+  - DTFoundation/Core (1.7.16)
+  - DTFoundation/DTAnimatedGIF (1.7.16)
+  - DTFoundation/DTHTMLParser (1.7.16):
+    - DTFoundation/Core
+  - DTFoundation/UIKit (1.7.16):
+    - DTFoundation/Core
+  - KMNavigationBarTransition (1.1.8)
+  - PanModal (1.2.7)
+  - SnapKit (5.0.1)
+  - YYText (1.0.7)
+  - ZIPFoundation (0.9.11)
+
+DEPENDENCIES:
+  - AsyncSwift
+  - Defaults
+  - DTCoreText
+  - KMNavigationBarTransition
+  - PanModal
+  - SnapKit
+  - YYText
+  - ZIPFoundation
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - AsyncSwift
+    - Defaults
+    - DTCoreText
+    - DTFoundation
+    - KMNavigationBarTransition
+    - PanModal
+    - SnapKit
+    - YYText
+    - ZIPFoundation
+
+SPEC CHECKSUMS:
+  AsyncSwift: 65775a7b32e740609b24969ece3de58723b9dc3e
+  Defaults: 2198ac20a65633de273110b5e9954f0a252f275b
+  DTCoreText: e92f4cf6b36d9d71ce4436d12cf089d74ab0596b
+  DTFoundation: e7781d9fd2f202bfd451fbbf8cab71ce83b46498
+  KMNavigationBarTransition: 7ee1a05ff758bce9258845a803f7a8b00585bd58
+  PanModal: 3e16ead1a907fb06f4df3f13492fd00149fa4974
+  SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
+  YYText: 5c461d709e24d55a182d1441c41dc639a18a4849
+  ZIPFoundation: b1f0de4eed33e74a676f76e12559ab6b75990197
+
+PODFILE CHECKSUM: 91694d58e6d129c7c0cbf30952ec03d6f227ca97
+
+COCOAPODS: 1.10.0
