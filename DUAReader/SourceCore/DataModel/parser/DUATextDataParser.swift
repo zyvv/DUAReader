@@ -68,11 +68,7 @@ class DUATextDataParser {
     
     func attributedStringFromChapterModel(chapter: DUAChapterModel, config: DUAConfiguration) -> NSAttributedString? {
         let tmpUrl = URL.init(fileURLWithPath: chapter.path!)
-        let tmpString = try? String.init(contentsOf: tmpUrl, encoding: String.Encoding.utf8)
-        if tmpString == nil {
-            return nil
-        }
-        let textString: String = tmpString!
+        guard let textString = try? String.init(contentsOf: tmpUrl, encoding: String.Encoding.utf8) else { return nil }
         
         let results = self.doTitleMatchWith(content: textString)
         var titleRange = NSRange(location: 0, length: 0)
@@ -87,7 +83,7 @@ class DUATextDataParser {
 
         let paragraphStyleTitle = NSMutableParagraphStyle()
         paragraphStyleTitle.alignment = NSTextAlignment.center
-        let dictTitle: [NSAttributedStringKey: Any] = [NSAttributedStringKey.font:UIFont.boldSystemFont(ofSize: 19),
+        let dictTitle: [NSAttributedStringKey: Any] = [NSAttributedStringKey.font:UIFont.boldSystemFont(ofSize: config.fontSize + 2),
                                                   NSAttributedStringKey.paragraphStyle:paragraphStyleTitle]
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -108,7 +104,7 @@ class DUATextDataParser {
     
     func cutPageWith(attrString: NSAttributedString, config: DUAConfiguration, completeHandler: (Int, DUAPageModel, Bool) -> Void) -> Void {
         let layouter = DTCoreTextLayouter.init(attributedString: attrString)
-        let rect = CGRect(x: config.contentFrame.origin.x, y: config.contentFrame.origin.y, width: config.contentFrame.size.width, height: config.contentFrame.size.height - 5)
+        let rect = CGRect(x: config.contentFrame.origin.x, y: config.contentFrame.origin.y, width: config.contentFrame.size.width, height: config.contentFrame.size.height)
         var frame = layouter?.layoutFrame(with: rect, range: NSRange(location: 0, length: attrString.length))
         
         var pageVisibleRange = frame?.visibleStringRange()

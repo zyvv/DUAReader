@@ -115,3 +115,7 @@ extension UIView {
     }
 
 }
+
+extension NSAttributedString {
+    
+}

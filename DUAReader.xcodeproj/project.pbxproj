@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		979587AB25EBAA37007C37E3 /* ReaderContentCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979587AA25EBAA37007C37E3 /* ReaderContentCell.swift */; };
+		979587E825EBD11E007C37E3 /* PageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 979587E725EBD11E007C37E3 /* PageViewModel.swift */; };
+		B47935FB65155F956C5C111E /* Pods_DUAReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 864B905C15F0FDD5E96CEC98 /* Pods_DUAReader.framework */; };
 		C52A9FC8200CA35200676D29 /* DUAAttributedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52A9FC7200CA35200676D29 /* DUAAttributedView.swift */; };
 		C52A9FF52010B90600676D29 /* DUAConVexLensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C52A9FF42010B90600676D29 /* DUAConVexLensView.swift */; };
 		C5474F261FF3430E005B50B9 /* UIView+subScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5474F251FF3430E005B50B9 /* UIView+subScript.swift */; };
 		C5474F281FF3499D005B50B9 /* 郭黄之恋.txt in Resources */ = {isa = PBXBuildFile; fileRef = C5474F271FF3499D005B50B9 /* 郭黄之恋.txt */; };
-		C5474F2D1FF37078005B50B9 /* DUAEpubDataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5474F2C1FF37078005B50B9 /* DUAEpubDataParser.swift */; };
 		C57026772007590600E2288D /* DUAtranslationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C57026762007590600E2288D /* DUAtranslationController.swift */; };
 		C5742F6B20085180000C077E /* BookMarkButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5742F6A20085180000C077E /* BookMarkButton.swift */; };
 		C5915BB51FFE2C6D00762D80 /* 每天懂一点好玩心理学.epub in Resources */ = {isa = PBXBuildFile; fileRef = C5915BB41FFE2C6D00762D80 /* 每天懂一点好玩心理学.epub */; };
@@ -33,7 +35,6 @@
 		C5BEC0E61FF1EFD1002FAC5A /* DUAStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0E51FF1EFD1002FAC5A /* DUAStatusBar.swift */; };
 		C5BEC0EC1FF1F0D6002FAC5A /* DUAChapterModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0EB1FF1F0D6002FAC5A /* DUAChapterModel.swift */; };
 		C5BEC0EE1FF1F0EB002FAC5A /* DUAPageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0ED1FF1F0EB002FAC5A /* DUAPageModel.swift */; };
-		C5BEC0F01FF1F11F002FAC5A /* DUADataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0EF1FF1F11F002FAC5A /* DUADataParser.swift */; };
 		C5BEC0F21FF1F14D002FAC5A /* DUATextDataParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0F11FF1F14D002FAC5A /* DUATextDataParser.swift */; };
 		C5BEC0F41FF1F15E002FAC5A /* DUAConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5BEC0F31FF1F15E002FAC5A /* DUAConfiguration.swift */; };
 		C5F49C8B1FF5193F00FDFF3A /* DUATableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F49C8A1FF5193F00FDFF3A /* DUATableView.swift */; };
@@ -41,12 +42,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		134570F043D346AD9DF32347 /* Pods-DUAReader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DUAReader.debug.xcconfig"; path = "Target Support Files/Pods-DUAReader/Pods-DUAReader.debug.xcconfig"; sourceTree = "<group>"; };
+		864B905C15F0FDD5E96CEC98 /* Pods_DUAReader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DUAReader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		979587AA25EBAA37007C37E3 /* ReaderContentCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderContentCell.swift; sourceTree = "<group>"; };
+		979587E725EBD11E007C37E3 /* PageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageViewModel.swift; sourceTree = "<group>"; };
 		C52A9FC7200CA35200676D29 /* DUAAttributedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAAttributedView.swift; sourceTree = "<group>"; };
 		C52A9FF42010B90600676D29 /* DUAConVexLensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAConVexLensView.swift; sourceTree = "<group>"; };
 		C5474F251FF3430E005B50B9 /* UIView+subScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+subScript.swift"; sourceTree = "<group>"; };
 		C5474F271FF3499D005B50B9 /* 郭黄之恋.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "郭黄之恋.txt"; sourceTree = "<group>"; };
 		C5474F2A1FF363DE005B50B9 /* libxml2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libxml2.tbd; path = usr/lib/libxml2.tbd; sourceTree = SDKROOT; };
-		C5474F2C1FF37078005B50B9 /* DUAEpubDataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAEpubDataParser.swift; sourceTree = "<group>"; };
 		C57026762007590600E2288D /* DUAtranslationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DUAtranslationController.swift; sourceTree = "<group>"; };
 		C5742F6A20085180000C077E /* BookMarkButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookMarkButton.swift; sourceTree = "<group>"; };
 		C5915BB41FFE2C6D00762D80 /* 每天懂一点好玩心理学.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = "每天懂一点好玩心理学.epub"; sourceTree = "<group>"; };
@@ -70,11 +74,11 @@
 		C5BEC0E51FF1EFD1002FAC5A /* DUAStatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAStatusBar.swift; sourceTree = "<group>"; };
 		C5BEC0EB1FF1F0D6002FAC5A /* DUAChapterModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAChapterModel.swift; sourceTree = "<group>"; };
 		C5BEC0ED1FF1F0EB002FAC5A /* DUAPageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAPageModel.swift; sourceTree = "<group>"; };
-		C5BEC0EF1FF1F11F002FAC5A /* DUADataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUADataParser.swift; sourceTree = "<group>"; };
 		C5BEC0F11FF1F14D002FAC5A /* DUATextDataParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUATextDataParser.swift; sourceTree = "<group>"; };
 		C5BEC0F31FF1F15E002FAC5A /* DUAConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUAConfiguration.swift; sourceTree = "<group>"; };
 		C5F49C8A1FF5193F00FDFF3A /* DUATableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUATableView.swift; sourceTree = "<group>"; };
 		C5F49C8C1FF5E43500FDFF3A /* DUATableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DUATableViewCell.swift; sourceTree = "<group>"; };
+		FDA322E339D5808F95037FB7 /* Pods-DUAReader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DUAReader.release.xcconfig"; path = "Target Support Files/Pods-DUAReader/Pods-DUAReader.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,16 +90,27 @@
 				C5BEC0DA1FF1EEEE002FAC5A /* DTCoreText.framework in Frameworks */,
 				C5B877C61FFCA395008844C5 /* TouchXML.framework in Frameworks */,
 				C5B877C21FFCA26E008844C5 /* libxml2.tbd in Frameworks */,
+				B47935FB65155F956C5C111E /* Pods_DUAReader.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B7A454F245CE2A94AF1054D /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				134570F043D346AD9DF32347 /* Pods-DUAReader.debug.xcconfig */,
+				FDA322E339D5808F95037FB7 /* Pods-DUAReader.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		C5474F291FF363DE005B50B9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				C5474F2A1FF363DE005B50B9 /* libxml2.tbd */,
+				864B905C15F0FDD5E96CEC98 /* Pods_DUAReader.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -123,6 +138,7 @@
 				C5BEC0C41FF1EE30002FAC5A /* DUAReader */,
 				C5BEC0C31FF1EE30002FAC5A /* Products */,
 				C5474F291FF363DE005B50B9 /* Frameworks */,
+				0B7A454F245CE2A94AF1054D /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -189,11 +205,13 @@
 		C5BEC0DC1FF1EF33002FAC5A /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				979587AA25EBAA37007C37E3 /* ReaderContentCell.swift */,
 				C5BEC0E51FF1EFD1002FAC5A /* DUAStatusBar.swift */,
 				C5F49C8A1FF5193F00FDFF3A /* DUATableView.swift */,
 				C5F49C8C1FF5E43500FDFF3A /* DUATableViewCell.swift */,
 				C52A9FC7200CA35200676D29 /* DUAAttributedView.swift */,
 				C52A9FF42010B90600676D29 /* DUAConVexLensView.swift */,
+				979587E725EBD11E007C37E3 /* PageViewModel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -229,9 +247,7 @@
 		C5BEC0E81FF1F051002FAC5A /* parser */ = {
 			isa = PBXGroup;
 			children = (
-				C5BEC0EF1FF1F11F002FAC5A /* DUADataParser.swift */,
 				C5BEC0F11FF1F14D002FAC5A /* DUATextDataParser.swift */,
-				C5474F2C1FF37078005B50B9 /* DUAEpubDataParser.swift */,
 			);
 			path = parser;
 			sourceTree = "<group>";
@@ -251,9 +267,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C5BEC0D41FF1EE30002FAC5A /* Build configuration list for PBXNativeTarget "DUAReader" */;
 			buildPhases = (
+				8C5CEE74B7398C14D3F80DA3 /* [CP] Check Pods Manifest.lock */,
 				C5BEC0BE1FF1EE30002FAC5A /* Sources */,
 				C5BEC0BF1FF1EE30002FAC5A /* Frameworks */,
 				C5BEC0C01FF1EE30002FAC5A /* Resources */,
+				1FE8B5D162657682EDEE4D14 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -315,6 +333,65 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		1FE8B5D162657682EDEE4D14 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-DUAReader/Pods-DUAReader-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/AsyncSwift/Async.framework",
+				"${BUILT_PRODUCTS_DIR}/DTCoreText/DTCoreText.framework",
+				"${BUILT_PRODUCTS_DIR}/DTFoundation/DTFoundation.framework",
+				"${BUILT_PRODUCTS_DIR}/Defaults/Defaults.framework",
+				"${BUILT_PRODUCTS_DIR}/KMNavigationBarTransition/KMNavigationBarTransition.framework",
+				"${BUILT_PRODUCTS_DIR}/PanModal/PanModal.framework",
+				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
+				"${BUILT_PRODUCTS_DIR}/YYText/YYText.framework",
+				"${BUILT_PRODUCTS_DIR}/ZIPFoundation/ZIPFoundation.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Async.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DTCoreText.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DTFoundation.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Defaults.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/KMNavigationBarTransition.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PanModal.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YYText.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZIPFoundation.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DUAReader/Pods-DUAReader-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8C5CEE74B7398C14D3F80DA3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DUAReader-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		C5BEC0BE1FF1EE30002FAC5A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -330,14 +407,14 @@
 				C5474F261FF3430E005B50B9 /* UIView+subScript.swift in Sources */,
 				C5BEC0C81FF1EE30002FAC5A /* ViewController.swift in Sources */,
 				C5BEC0E61FF1EFD1002FAC5A /* DUAStatusBar.swift in Sources */,
+				979587AB25EBAA37007C37E3 /* ReaderContentCell.swift in Sources */,
 				C52A9FC8200CA35200676D29 /* DUAAttributedView.swift in Sources */,
 				C5BEC0E01FF1EF67002FAC5A /* DUAReader.swift in Sources */,
 				C5742F6B20085180000C077E /* BookMarkButton.swift in Sources */,
-				C5474F2D1FF37078005B50B9 /* DUAEpubDataParser.swift in Sources */,
 				C5BEC0EE1FF1F0EB002FAC5A /* DUAPageModel.swift in Sources */,
+				979587E825EBD11E007C37E3 /* PageViewModel.swift in Sources */,
 				C5BEC0C61FF1EE30002FAC5A /* AppDelegate.swift in Sources */,
 				C52A9FF52010B90600676D29 /* DUAConVexLensView.swift in Sources */,
-				C5BEC0F01FF1F11F002FAC5A /* DUADataParser.swift in Sources */,
 				C5F49C8D1FF5E43500FDFF3A /* DUATableViewCell.swift in Sources */,
 				C5BEC0E41FF1EFAB002FAC5A /* DUABackViewController.swift in Sources */,
 			);
@@ -474,10 +551,12 @@
 		};
 		C5BEC0D51FF1EE30002FAC5A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 134570F043D346AD9DF32347 /* Pods-DUAReader.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = VN2D9WHJ93;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/DUAReader/ThirdKit",
@@ -487,7 +566,7 @@
 					"$(SRCROOT)/DUAReader/SwiftLibXML2",
 				);
 				INFOPLIST_FILE = DUAReader/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.duan.DUAReader;
@@ -500,10 +579,12 @@
 		};
 		C5BEC0D61FF1EE30002FAC5A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FDA322E339D5808F95037FB7 /* Pods-DUAReader.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = NO;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = VN2D9WHJ93;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/DUAReader/ThirdKit",
@@ -513,7 +594,7 @@
 					"$(SRCROOT)/DUAReader/SwiftLibXML2",
 				);
 				INFOPLIST_FILE = DUAReader/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.duan.DUAReader;

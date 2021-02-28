@@ -41,6 +41,11 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     private var tableView: DUATableView?
     /// translation vc
     private var translationVC: DUAtranslationControllerExt?
+
+    private var collectionView: UICollectionView?
+    
+    private var currentChapterDataSource: [DUAPageModel] = []
+    
     /// 状态栏
     private var statusBar: DUAStatusBar?
     /// 是否重分页
@@ -64,9 +69,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     private var statusBarForTableView: DUAStatusBar?
     /// 是否成功切换到某章节，成功为0，不成功则记录未成功切换的章节index，当指定跳至某章节时使用
     var successSwitchChapter = 0
-    
-    
-    
     
     override var prefersStatusBarHidden: Bool {
         return true
@@ -231,7 +233,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         case .curl:
             self.loadPageViewController()
         case .vertical:
-            self.loadTableView()
+            self.loadTableView(scrollDirection: .vertical)
         case .horizontal:
             self.loadTranslationVC(animating: true)
         case .none:
@@ -259,20 +261,39 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         self.pageVC = pageVC
     }
     
-    private func loadTableView() -> Void {
+    private func loadTableView(scrollDirection: UICollectionViewScrollDirection) -> Void {
         
         self.clearReaderViewIfNeed()
-        let tableView = DUATableView(frame: CGRect.init(x: 0, y: config.contentFrame.origin.y, width: UIScreen.main.bounds.size.width, height: config.contentFrame.size.height), style: .plain)
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.showsVerticalScrollIndicator = false
-        tableView.separatorStyle = .none
-        tableView.estimatedRowHeight = 0
-        tableView.scrollsToTop = false
-        tableView.backgroundColor = UIColor.clear
-
-        self.view.addSubview(tableView)
-        self.tableView = tableView
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = scrollDirection
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = .zero
+        layout.itemSize = CGSize(width: screenWidth, height: screenHeight)
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView?.showsVerticalScrollIndicator = false
+        collectionView?.showsHorizontalScrollIndicator = false
+//        collectionView?.isPagingEnabled = true
+        collectionView?.delegate = self
+        collectionView?.dataSource = self
+        collectionView?.backgroundColor = .clear
+        collectionView?.register(ReaderContentCell.self, forCellWithReuseIdentifier: "ReaderContentCell")
+        view.addSubview(collectionView!)
+        collectionView?.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+//        let tableView = DUATableView(frame: CGRect.init(x: 0, y: config.contentFrame.origin.y, width: UIScreen.main.bounds.size.width, height: config.contentFrame.size.height), style: .plain)
+//        tableView.dataSource = self
+//        tableView.delegate = self
+//        tableView.showsVerticalScrollIndicator = false
+//        tableView.separatorStyle = .none
+//        tableView.estimatedRowHeight = 0
+//        tableView.scrollsToTop = false
+//        tableView.backgroundColor = UIColor.clear
+//
+//        self.view.addSubview(tableView)
+//        self.tableView = tableView
         
         self.addStatusBarTo(view: self.view, totalCounts: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count, curPage: currentPageIndex)
     }
@@ -301,20 +322,18 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             }
             self.pageVC?.setViewControllers([page!], direction: .forward, animated: false, completion: nil)
         case .vertical:
-            tableView?.dataArray.removeAll()
-            tableView?.dataArray = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
-            self.tableView?.cellIndex = pageIndex
-            if tableView?.dataArray == nil {
-                return
-            }
+            currentChapterDataSource.removeAll()
+            currentChapterDataSource = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
+//            self.tableView?.cellIndex = pageIndex
+//            if tableView?.dataArray == nil {
+//                return
+//            }
             
-            self.tableView?.isReloading = true
-            self.tableView?.reloadData()
-            self.tableView?.scrollToRow(at: IndexPath.init(row: tableView?.cellIndex ?? 0, section: 0), at: UITableViewScrollPosition.top, animated: false)
-            self.tableView?.isReloading = false
+            collectionView?.reloadData()
+            collectionView?.scrollToItem(at: IndexPath(item: pageIndex, section: 0), at: .top, animated: false)
             
-            self.statusBarForTableView?.totalPageCounts = (tableView?.dataArray.count) ?? 0
-            self.statusBarForTableView?.curPageIndex = currentPageIndex
+//            self.statusBarForTableView?.totalPageCounts = (tableView?.dataArray.count) ?? 0
+//            self.statusBarForTableView?.curPageIndex = currentPageIndex
             
             /// 当加载的页码为最后一页，需要手动触发一次下一章的请求
             if self.currentPageIndex == self.pageArrayFromCache(chapterIndex: self.currentChapterIndex).count - 1 {
@@ -500,7 +519,8 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     /// 请求下个章节 for tableview
     private func requestNextChapterForTableView() -> Void {
         tableView?.scrollDirection = .down
-        if currentChapterIndex + 1 > totalChapterModels.count {
+        if currentChapterIndex >= totalChapterModels.count {
+            // 最后一个章节已经读完了
             return
         }
         self.requestChapterWith(index: currentChapterIndex + 1)
@@ -511,15 +531,28 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             self.postReaderStateNotification(state: .busy)
             return
         }
-        var indexPathsToInsert: [IndexPath] = []
-        for (index, _) in nextPages.enumerated() {
-            let indexPath = IndexPath(row: (tableView?.dataArray.count ?? 0) + index, section: 0)
-            indexPathsToInsert.append(indexPath)
+//        var indexPathsToInsert: [IndexPath] = []
+//        for (index, _) in nextPages.enumerated() {
+//            let indexPath = IndexPath(row: (tableView?.dataArray.count ?? 0) + index, section: 0)
+//            indexPathsToInsert.append(indexPath)
+//        }
+//        self.tableView?.dataArray += nextPages
+//        self.tableView?.beginUpdates()
+//        self.tableView?.insertRows(at: indexPathsToInsert, with: .none)
+//        self.tableView?.endUpdates()
+        
+        
+        
+        let fromItemIndex = currentChapterDataSource.count
+        let insetItemIndexPaths = nextPages.enumerated().map { index, _ in
+            IndexPath(item: index + fromItemIndex, section: 0)
         }
-        self.tableView?.dataArray += nextPages
-        self.tableView?.beginUpdates()
-        self.tableView?.insertRows(at: indexPathsToInsert, with: .none)
-        self.tableView?.endUpdates()
+        
+        currentChapterDataSource.append(contentsOf: nextPages)
+        
+        collectionView?.performBatchUpdates({
+            collectionView?.insertItems(at: insetItemIndexPaths)
+        }, completion: nil)
     }
     
     // MARK:--预缓存
@@ -790,66 +823,66 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     }
     
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if tableView?.isReloading ?? false {
-            return
-        }
-        if scrollView.contentOffset.y <= 0 {
-            scrollView.contentOffset.y = 0
-            // cell index = 0 需要请求上一章
-            if tableView?.arrivedZeroOffset == false {
-                self.requestLastChapterForTableView()
-            }
-            tableView?.arrivedZeroOffset = true
-        }else {
-            tableView?.arrivedZeroOffset = false
-        }
-        
-        let basePoint = CGPoint(x: config.contentFrame.width/2.0, y: scrollView.contentOffset.y + config.contentFrame.height/2.0)
-        let majorIndexPath = tableView?.indexPathForRow(at: basePoint)
-        
-        if majorIndexPath!.row > tableView!.cellIndex { // 向后翻页
-            
-            prePageStartLocation = -1
-            tableView?.cellIndex = majorIndexPath!.row
-            currentPageIndex = (self.tableView?.dataArray[tableView!.cellIndex].pageIndex)!
-            print("进入下一页 页码 \(currentPageIndex)")
-            
-            if currentPageIndex == 0 {
-                print("跳入下一章，从 \(currentChapterIndex) 到 \(currentChapterIndex + 1)")
-                updateChapterIndex(index: currentChapterIndex + 1)
-                self.statusBarForTableView?.totalPageCounts = self.pageArrayFromCache(chapterIndex: currentChapterIndex).count
-            }
-            self.statusBarForTableView?.curPageIndex = currentPageIndex
-            
-            // 到达本章节最后一页，请求下一章
-            if tableView?.cellIndex == (self.tableView?.dataArray.count)! - 1 {
-                self.requestNextChapterForTableView()
-            }
-            
-            if self.delegate?.reader(reader: readerProgressUpdated: curPage: totalPages: ) != nil {
-                self.delegate?.reader(reader: self, readerProgressUpdated: currentChapterIndex, curPage: currentPageIndex + 1, totalPages: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count)
-            }
-        }else if majorIndexPath!.row < tableView!.cellIndex {     //向前翻页
-            prePageStartLocation = -1
-            tableView?.cellIndex = majorIndexPath!.row
-            currentPageIndex = (self.tableView?.dataArray[tableView!.cellIndex].pageIndex)!
-            print("进入上一页 页码 \(currentPageIndex)")
-            
-            let previousPageIndex = self.tableView!.dataArray[tableView!.cellIndex + 1].pageIndex
-            if currentChapterIndex - 1 > 0 && currentPageIndex == self.pageArrayFromCache(chapterIndex: currentChapterIndex - 1).count - 1 && previousPageIndex == 0 {
-                print("跳入上一章，从 \(currentChapterIndex) 到 \(currentChapterIndex - 1)")
-                updateChapterIndex(index: currentChapterIndex - 1)
-                self.statusBarForTableView?.totalPageCounts = self.pageArrayFromCache(chapterIndex: currentChapterIndex).count
-
-            }
-            self.statusBarForTableView?.curPageIndex = currentPageIndex
-            
-            if self.delegate?.reader(reader: readerProgressUpdated: curPage: totalPages: ) != nil {
-                self.delegate?.reader(reader: self, readerProgressUpdated: currentChapterIndex, curPage: currentPageIndex + 1, totalPages: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count)
-            }
-        }
-    }
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        if tableView?.isReloading ?? false {
+//            return
+//        }
+//        if scrollView.contentOffset.y <= 0 {
+//            scrollView.contentOffset.y = 0
+//            // cell index = 0 需要请求上一章
+//            if tableView?.arrivedZeroOffset == false {
+//                self.requestLastChapterForTableView()
+//            }
+//            tableView?.arrivedZeroOffset = true
+//        }else {
+//            tableView?.arrivedZeroOffset = false
+//        }
+//        
+//        let basePoint = CGPoint(x: config.contentFrame.width/2.0, y: scrollView.contentOffset.y + config.contentFrame.height/2.0)
+//        let majorIndexPath = tableView?.indexPathForRow(at: basePoint)
+//        
+//        if majorIndexPath!.row > tableView!.cellIndex { // 向后翻页
+//            
+//            prePageStartLocation = -1
+//            tableView?.cellIndex = majorIndexPath!.row
+//            currentPageIndex = (self.tableView?.dataArray[tableView!.cellIndex].pageIndex)!
+//            print("进入下一页 页码 \(currentPageIndex)")
+//            
+//            if currentPageIndex == 0 {
+//                print("跳入下一章，从 \(currentChapterIndex) 到 \(currentChapterIndex + 1)")
+//                updateChapterIndex(index: currentChapterIndex + 1)
+//                self.statusBarForTableView?.totalPageCounts = self.pageArrayFromCache(chapterIndex: currentChapterIndex).count
+//            }
+//            self.statusBarForTableView?.curPageIndex = currentPageIndex
+//            
+//            // 到达本章节最后一页，请求下一章
+//            if tableView?.cellIndex == (self.tableView?.dataArray.count)! - 1 {
+//                self.requestNextChapterForTableView()
+//            }
+//            
+//            if self.delegate?.reader(reader: readerProgressUpdated: curPage: totalPages: ) != nil {
+//                self.delegate?.reader(reader: self, readerProgressUpdated: currentChapterIndex, curPage: currentPageIndex + 1, totalPages: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count)
+//            }
+//        }else if majorIndexPath!.row < tableView!.cellIndex {     //向前翻页
+//            prePageStartLocation = -1
+//            tableView?.cellIndex = majorIndexPath!.row
+//            currentPageIndex = (self.tableView?.dataArray[tableView!.cellIndex].pageIndex)!
+//            print("进入上一页 页码 \(currentPageIndex)")
+//            
+//            let previousPageIndex = self.tableView!.dataArray[tableView!.cellIndex + 1].pageIndex
+//            if currentChapterIndex - 1 > 0 && currentPageIndex == self.pageArrayFromCache(chapterIndex: currentChapterIndex - 1).count - 1 && previousPageIndex == 0 {
+//                print("跳入上一章，从 \(currentChapterIndex) 到 \(currentChapterIndex - 1)")
+//                updateChapterIndex(index: currentChapterIndex - 1)
+//                self.statusBarForTableView?.totalPageCounts = self.pageArrayFromCache(chapterIndex: currentChapterIndex).count
+//
+//            }
+//            self.statusBarForTableView?.curPageIndex = currentPageIndex
+//            
+//            if self.delegate?.reader(reader: readerProgressUpdated: curPage: totalPages: ) != nil {
+//                self.delegate?.reader(reader: self, readerProgressUpdated: currentChapterIndex, curPage: currentPageIndex + 1, totalPages: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count)
+//            }
+//        }
+//    }
     
     // MARK: DUATranslationController Delegate
     
@@ -921,4 +954,27 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         }
     }
 
+}
+
+extension DUAReader: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return currentChapterDataSource.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ReaderContentCell", for: indexPath) as? ReaderContentCell else {
+            fatalError("ReaderContentCell 复用错误")
+        }
+        cell.pageModel = currentChapterDataSource[indexPath.item]
+        return cell
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if indexPath.item == currentChapterDataSource.count - 2 {
+            // 提前加载下一章节
+            requestNextChapterForTableView()
+        }
+    }
+    
 }
