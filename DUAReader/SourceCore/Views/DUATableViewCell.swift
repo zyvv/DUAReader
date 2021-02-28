@@ -23,9 +23,7 @@ class DUATableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.selectionStyle = .none
         self.backgroundColor = UIColor.clear
-    
-//        self.layer.borderColor = UIColor.gray.cgColor
-//        self.layer.borderWidth = 1
+
     }
     
     required init?(coder aDecoder: NSCoder) {

@@ -23,10 +23,10 @@ enum translationControllerNavigationDirection {
 }
 
 protocol DUATranslationProtocol: NSObjectProtocol {
-    func translationController(translationController: DUAtranslationController, controllerAfter controller: UIViewController) -> UIViewController?
-    func translationController(translationController: DUAtranslationController, controllerBefore controller: UIViewController) -> UIViewController?
-    func translationController(translationController: DUAtranslationController, willTransitionTo controller: UIViewController) -> Void
-    func translationController(translationController: DUAtranslationController, didFinishAnimating finished: Bool, previousController: UIViewController, transitionCompleted completed: Bool) -> Void
+    func translationController(translationController: DUAtranslationController, controllerAfter controller: UIViewController?) -> UIViewController?
+    func translationController(translationController: DUAtranslationController, controllerBefore controller: UIViewController?) -> UIViewController?
+    func translationController(translationController: DUAtranslationController, willTransitionTo controller: UIViewController?) -> Void
+    func translationController(translationController: DUAtranslationController, didFinishAnimating finished: Bool, previousController: UIViewController?, transitionCompleted completed: Bool) -> Void
 }
 
 
@@ -59,9 +59,7 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
                 self.removeController(controller: controller)
             }
             self.addController(controller: viewController)
-            if completionHandler != nil {
-                completionHandler!(true)
-            }
+            completionHandler?(true)
         }else {
             let oldController = self.childViewControllers.first
             self.addController(controller: viewController)
@@ -86,11 +84,9 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
                 viewController.view.transform = newVCEndTransform
             }, completion: { (complete) in
                 if complete {
-                    self.removeController(controller: oldController!)
+                    self.removeController(controller: oldController)
                 }
-                if completionHandler != nil {
-                    completionHandler!(complete)
-                }
+                completionHandler?(complete)
                 
             })
         }
@@ -134,17 +130,20 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
                 }
                 else if scrollDirection == -1 {
                     scrollDirection = 1
-                    self.removeController(controller: pendingController!)
+                    self.removeController(controller: pendingController)
                     allowRequestNewController = true
                 }
                 // go to right
                 if allowRequestNewController {
                     allowRequestNewController = false
-                    pendingController = self.delegate?.translationController(translationController: self, controllerBefore: currentController!)
-                    pendingController?.view.transform = CGAffineTransform(translationX: -screenWidth, y: 0)
+                    if currentController != nil {
+                        pendingController = self.delegate?.translationController(translationController: self, controllerBefore: currentController)
+                        pendingController?.view.transform = CGAffineTransform(translationX: -screenWidth, y: 0)
+                    }
+                    
                     if pendingController != nil {
-                        self.delegate?.translationController(translationController: self, willTransitionTo: pendingController!)
-                        self.addController(controller: pendingController!)
+                        self.delegate?.translationController(translationController: self, willTransitionTo: pendingController)
+                        self.addController(controller: pendingController)
                     }
                 }
                 
@@ -155,17 +154,19 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
                 }
                 else if scrollDirection == 1 {
                     scrollDirection = -1
-                    self.removeController(controller: pendingController!)
+                    self.removeController(controller: pendingController)
                     allowRequestNewController = true
                 }
                 // go to left
                 if allowRequestNewController {
                     allowRequestNewController = false
-                    pendingController = self.delegate?.translationController(translationController: self, controllerAfter: currentController!)
-                    pendingController?.view.transform = CGAffineTransform(translationX: screenWidth, y: 0)
+                    if currentController != nil {
+                        pendingController = self.delegate?.translationController(translationController: self, controllerAfter: currentController)
+                        pendingController?.view.transform = CGAffineTransform(translationX: screenWidth, y: 0)
+                    }
                     if pendingController != nil {
-                        self.delegate?.translationController(translationController: self, willTransitionTo: pendingController!)
-                        self.addController(controller: pendingController!)
+                        self.delegate?.translationController(translationController: self, willTransitionTo: pendingController)
+                        self.addController(controller: pendingController)
                     }
                 }
                 
@@ -221,9 +222,9 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
                 self.currentController?.view.transform = currentEndTransform
             }, completion: { (complete) in
                 if complete {
-                    self.removeController(controller: removeController!)
+                    self.removeController(controller: removeController)
                 }
-                self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: self.currentController!, transitionCompleted: transitionFinished)
+                self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: self.currentController, transitionCompleted: transitionFinished)
             })
             
         }
@@ -233,46 +234,41 @@ class DUAtranslationController: UIViewController, UIGestureRecognizerDelegate {
     ///
     /// - Parameter gesture: 点击手势识别器
     @objc func handleTapGes(gesture: UITapGestureRecognizer) -> Void {
-        let hitPoint = gesture.location(in: gesture.view)
-        let curController = self.childViewControllers.first!
+        guard let curController = self.childViewControllers.first else { return }
+        guard let touchedView = gesture.view else { return }
+        let hitPoint = gesture.location(in: touchedView)
         
-        if hitPoint.x < gesture.view!.frame.size.width/3 {
+        if hitPoint.x < touchedView.frame.size.width/3 {
 //            滑向上一个controller
-            let lastController = self.delegate?.translationController(translationController: self, controllerBefore: curController)
-            if lastController != nil {
-                self.delegate?.translationController(translationController: self, willTransitionTo: lastController!)
-                self.setViewController(viewController: lastController!, direction: .right, animated: allowAnimating, completionHandler: {(complete) in
-                    self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: curController, transitionCompleted: complete)
-                })
-            }
-            
+            guard let lastController = self.delegate?.translationController(translationController: self, controllerBefore: curController) else { return }
+            self.delegate?.translationController(translationController: self, willTransitionTo: lastController)
+            self.setViewController(viewController: lastController, direction: .right, animated: allowAnimating, completionHandler: {(complete) in
+                self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: curController, transitionCompleted: complete)
+            })
         }
-        if hitPoint.x > gesture.view!.frame.size.width*2/3 {
+            
+        if hitPoint.x > touchedView.frame.size.width*2/3 {
 //            滑向下一个controller
-            let nextController: UIViewController? = self.delegate?.translationController(translationController: self, controllerAfter: self.childViewControllers.first!)
-            if nextController != nil {
-                self.delegate?.translationController(translationController: self, willTransitionTo: nextController!)
-                self.setViewController(viewController: nextController!, direction: .left, animated: allowAnimating, completionHandler: {(complete) in
-
-                    self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: curController, transitionCompleted: complete)
-                })
-            }
-            
+            guard let nextController = self.delegate?.translationController(translationController: self, controllerAfter: curController) else { return }
+            self.delegate?.translationController(translationController: self, willTransitionTo: nextController)
+            self.setViewController(viewController: nextController, direction: .left, animated: allowAnimating, completionHandler: {(complete) in
+                self.delegate?.translationController(translationController: self, didFinishAnimating: complete, previousController: curController, transitionCompleted: complete)
+            })
         }
-        
     }
 
     //    MAEK: 添加删除controller
-    func addController(controller: UIViewController) -> Void {
-        self.addChildViewController(controller)
-        controller.didMove(toParentViewController: self)
-        self.view.addSubview(controller.view)
+    func addController(controller: UIViewController?) -> Void {
+        if controller == nil { return }
+        self.addChildViewController(controller!)
+        controller!.didMove(toParentViewController: self)
+        self.view.addSubview(controller!.view)
     }
     
-    func removeController(controller: UIViewController) -> Void {
-        controller.view.removeFromSuperview()
-        controller.willMove(toParentViewController: nil)
-        controller.removeFromParentViewController()
+    func removeController(controller: UIViewController?) -> Void {
+        controller?.view.removeFromSuperview()
+        controller?.willMove(toParentViewController: nil)
+        controller?.removeFromParentViewController()
     }
     
 

@@ -31,29 +31,17 @@ class ViewController: UIViewController, DUAReaderDelegate, UITableViewDelegate, 
         configuration.backgroundImage = UIImage.init(named: "backImg.jpg")
         mreader.config = configuration
         mreader.delegate = self
+        mreader.modalPresentationStyle = .fullScreen
         self.present(mreader, animated: true, completion: nil)
-        let bookPath = Bundle.main.path(forResource: "郭黄之恋", ofType: "txt")
-        mreader.readWith(filePath: bookPath!, pageIndex: 1)
+        let epubPath = Bundle.main.path(forResource: "郭黄之恋", ofType: "txt")
+        mreader.readWith(filePath: epubPath!, pageIndex: 1)
         
 //        记录阅读的书，demo使用
-        curBookName = "郭黄之恋"
+        curBookName = "The Silver Chair"
     
     }
     
     @IBAction func onBtn2Clicked(_ sender: Any) {
-        mreader = DUAReader()
-        let configuration = DUAConfiguration.init()
-        configuration.backgroundImage = UIImage.init(named: "backImg.jpg")
-        configuration.bookType = .epub
-        mreader.config = configuration
-        mreader.delegate = self
-        self.present(mreader, animated: true, completion: nil)
-        let epubPath = Bundle.main.path(forResource: "每天懂一点好玩心理学", ofType: "epub")
-        mreader.readWith(filePath: epubPath!, pageIndex: 1)
-        
-//        记录阅读的书，demo使用
-        curBookName = "每天懂一点好玩心理学"
-
     }
     
     override func viewDidLoad() {

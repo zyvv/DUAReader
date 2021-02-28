@@ -9,9 +9,9 @@
 import UIKit
 import DTCoreText
 
-class DUATextDataParser: DUADataParser {
+class DUATextDataParser {
 
-    override func parseChapterFromBook(path: String, completeHandler: @escaping (Array<String>, Array<DUAChapterModel>) -> Void) {
+    func parseChapterFromBook(path: String, completeHandler: @escaping (Array<String>, Array<DUAChapterModel>) -> Void) {
         let url = URL.init(fileURLWithPath: path)
         let content = try! String.init(contentsOf: url, encoding: String.Encoding.utf8)
         var models = Array<DUAChapterModel>()
@@ -66,7 +66,7 @@ class DUATextDataParser: DUADataParser {
         }
     }
     
-    override func attributedStringFromChapterModel(chapter: DUAChapterModel, config: DUAConfiguration) -> NSAttributedString? {
+    func attributedStringFromChapterModel(chapter: DUAChapterModel, config: DUAConfiguration) -> NSAttributedString? {
         let tmpUrl = URL.init(fileURLWithPath: chapter.path!)
         let tmpString = try? String.init(contentsOf: tmpUrl, encoding: String.Encoding.utf8)
         if tmpString == nil {
@@ -104,6 +104,35 @@ class DUATextDataParser: DUADataParser {
         attrString.append(content)
         
         return attrString
+    }
+    
+    func cutPageWith(attrString: NSAttributedString, config: DUAConfiguration, completeHandler: (Int, DUAPageModel, Bool) -> Void) -> Void {
+        let layouter = DTCoreTextLayouter.init(attributedString: attrString)
+        let rect = CGRect(x: config.contentFrame.origin.x, y: config.contentFrame.origin.y, width: config.contentFrame.size.width, height: config.contentFrame.size.height - 5)
+        var frame = layouter?.layoutFrame(with: rect, range: NSRange(location: 0, length: attrString.length))
+        
+        var pageVisibleRange = frame?.visibleStringRange()
+        var rangeOffset = pageVisibleRange!.location + pageVisibleRange!.length
+        var count = 1
+        
+        while rangeOffset <= attrString.length && rangeOffset != 0 {
+            let pageModel = DUAPageModel.init()
+            pageModel.attributedString = attrString.attributedSubstring(from: pageVisibleRange!)
+            pageModel.range = pageVisibleRange
+            pageModel.pageIndex = count - 1
+            
+            frame = layouter?.layoutFrame(with: rect, range: NSRange(location: rangeOffset, length: attrString.length - rangeOffset))
+            pageVisibleRange = frame?.visibleStringRange()
+            if pageVisibleRange == nil {
+                rangeOffset = 0
+            }else {
+                rangeOffset = pageVisibleRange!.location + pageVisibleRange!.length
+            }
+            
+            let completed = (rangeOffset <= attrString.length && rangeOffset != 0) ? false : true
+            completeHandler(count, pageModel, completed)
+            count += 1
+        }
     }
     
     

@@ -150,15 +150,15 @@ class DUAAttributedView: DTAttributedLabel, UIGestureRecognizerDelegate {
         
 //        save left and roght cursor location
         let firstRect = selectedLineArray.first!
-        leftCursor = CGRect(x: firstRect.origin.x - 4, y: firstRect.origin.y, width: 4, height: firstRect.size.height)
+        leftCursor = CGRect(x: firstRect.origin.x - 2, y: firstRect.origin.y, width: 2, height: firstRect.size.height)
         let lastRect = selectedLineArray.last!
-        rightCursor = CGRect(x: lastRect.maxX, y: lastRect.origin.y, width: 4, height: lastRect.size.height)
+        rightCursor = CGRect(x: lastRect.maxX, y: lastRect.origin.y, width: 2, height: lastRect.size.height)
         
 //        draw cursor
         context?.addRect(leftCursor)
         context?.addRect(rightCursor)
-        context?.addEllipse(in: CGRect(x: leftCursor.midX - 3, y: leftCursor.origin.y - 6, width: 6, height: 6))
-        context?.addEllipse(in: CGRect(x: rightCursor.midX - 3, y: rightCursor.maxY, width: 6, height: 6))
+        context?.addEllipse(in: CGRect(x: leftCursor.midX - 5, y: leftCursor.origin.y - 9, width: 10, height: 10))
+        context?.addEllipse(in: CGRect(x: rightCursor.midX - 5, y: rightCursor.maxY - 1, width: 10, height: 10))
         context?.setFillColor(UIColor.black.cgColor)
         context?.fillPath()
     
@@ -227,8 +227,7 @@ class DUAAttributedView: DTAttributedLabel, UIGestureRecognizerDelegate {
         self.becomeFirstResponder()
         let menuController = UIMenuController.shared
         let copyItem = UIMenuItem.init(title: "复制", action: #selector(onCopyItemClicked))
-        let noteItem = UIMenuItem.init(title: "笔记", action: #selector(onNoteItemClicked))
-        menuController.menuItems = [copyItem, noteItem]
+        menuController.menuItems = [copyItem]
         var rect: CGRect = CGRect()
         if selectedLineArray.first != nil {
             rect = selectedLineArray.first!
@@ -245,8 +244,7 @@ class DUAAttributedView: DTAttributedLabel, UIGestureRecognizerDelegate {
     
     func showConvexLensView(point: CGPoint) -> Void {
         if self.convexView == nil {
-            self.convexView = DUAConVexLensView()
-            UIApplication.shared.keyWindow?.addSubview(self.convexView!)
+            self.convexView = DUAConVexLensView(targetWindow: self.window)
         }
     }
     

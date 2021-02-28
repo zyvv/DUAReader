@@ -15,11 +15,6 @@ enum DUAReaderScrollType: Int {
     case none
 }
 
-enum DUAReaderBookType {
-    case txt
-    case epub
-}
-
 class DUAConfiguration: NSObject {
 
     var contentFrame = CGRect()
@@ -49,9 +44,6 @@ class DUAConfiguration: NSObject {
             self.didScrollTypeChanged(scrollType)
         }
     }
-    
-    var bookType = DUAReaderBookType.txt
-    
     
     var didFontSizeChanged: (CGFloat) -> Void = {_ in }
     var didFontNameChanged: (String) -> Void = {_ in }

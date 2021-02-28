@@ -32,7 +32,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     /// chapter model cache
     private var chapterModels = [String: DUAChapterModel]()
     /// 数据解析类
-    private var dataParser: DUADataParser = DUADataParser()
+    private var dataParser: DUATextDataParser = DUATextDataParser()
     /// 缓存队列
     private var cacheQueue: DispatchQueue = DispatchQueue(label: "duareader.cache.queue")
     /// page vc
@@ -81,7 +81,9 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
                 self.delegate?.reader(reader: self, chapterTitles: titles)
             }
             self.totalChapterModels = models
-            self.readWith(chapter: models.first!, pageIndex: pageIndex)
+            if models.count > 0 {
+                self.readWith(chapter: models.first!, pageIndex: pageIndex)
+            }
         })
         
     }
@@ -125,8 +127,8 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
                 if self.pageArrayFromCache(chapterIndex: chapter.chapterIndex).isEmpty == false {
                     return
                 }
-                let attrString = self.dataParser.attributedStringFromChapterModel(chapter: chapter, config: self.config)
-                self.dataParser.cutPageWith(attrString: attrString!, config: self.config, completeHandler: {
+                guard let attrString = self.dataParser.attributedStringFromChapterModel(chapter: chapter, config: self.config) else { return }
+                self.dataParser.cutPageWith(attrString: attrString, config: self.config, completeHandler: {
                     (completedPageCounts, page, completed) -> Void in
                     pageModels.append(page)
                     if completed {
@@ -175,7 +177,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             isReCutPage = false
             var newIndex = 1
             for (index, item) in pages.enumerated() {
-                if prePageStartLocation >= (item.range?.location)! && prePageStartLocation <= (item.range?.location)! + (item.range?.length)! {
+                if prePageStartLocation >= (item.range?.location ?? 0) && prePageStartLocation <= (item.range?.location ?? 0) + (item.range?.length ?? 0) {
                     newIndex = index
                 }
             }
@@ -218,11 +220,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.white
-        if self.config.bookType == DUAReaderBookType.epub {
-            self.dataParser = DUAEpubDataParser()
-        }else {
-            self.dataParser = DUATextDataParser()
-        }
         let tapGesture = UITapGestureRecognizer.init(target: self, action: #selector(pagingTap(ges:)))
         self.view.addGestureRecognizer(tapGesture)
         self.addObserverForConfiguration()
@@ -250,30 +247,32 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
 
         self.clearReaderViewIfNeed()
         let transtionStyle: UIPageViewControllerTransitionStyle = (self.config.scrollType == .curl) ? .pageCurl : .scroll
-        self.pageVC = DUAContainerPageViewController(transitionStyle: transtionStyle, navigationOrientation: .horizontal, options: nil)
-        self.pageVC?.dataSource = self
-        self.pageVC?.delegate = self
-        self.pageVC?.view.backgroundColor = UIColor.clear
-        self.pageVC?.isDoubleSided = (self.config.scrollType == .curl) ? true : false
-        
-        self.addChildViewController(self.pageVC!)
-        self.view.addSubview((self.pageVC?.view)!)
-        self.pageVC?.didMove(toParentViewController: self)
+        let pageVC = DUAContainerPageViewController(transitionStyle: transtionStyle, navigationOrientation: .horizontal, options: nil)
+        pageVC.dataSource = self
+        pageVC.delegate = self
+        pageVC.view.backgroundColor = UIColor.clear
+        pageVC.isDoubleSided = (self.config.scrollType == .curl) ? true : false
+
+        self.addChildViewController(pageVC)
+        self.view.addSubview(pageVC.view)
+        pageVC.didMove(toParentViewController: self)
+        self.pageVC = pageVC
     }
     
     private func loadTableView() -> Void {
         
         self.clearReaderViewIfNeed()
-        self.tableView = DUATableView(frame: CGRect.init(x: 0, y: config.contentFrame.origin.y, width: UIScreen.main.bounds.size.width, height: config.contentFrame.size.height), style: .plain)
-        self.tableView!.dataSource = self
-        self.tableView!.delegate = self
-        self.tableView!.showsVerticalScrollIndicator = false
-        self.tableView!.separatorStyle = .none
-        self.tableView!.estimatedRowHeight = 0
-        self.tableView!.scrollsToTop = false
-        self.tableView!.backgroundColor = UIColor.clear
+        let tableView = DUATableView(frame: CGRect.init(x: 0, y: config.contentFrame.origin.y, width: UIScreen.main.bounds.size.width, height: config.contentFrame.size.height), style: .plain)
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.showsVerticalScrollIndicator = false
+        tableView.separatorStyle = .none
+        tableView.estimatedRowHeight = 0
+        tableView.scrollsToTop = false
+        tableView.backgroundColor = UIColor.clear
 
-        self.view.addSubview(tableView!)
+        self.view.addSubview(tableView)
+        self.tableView = tableView
         
         self.addStatusBarTo(view: self.view, totalCounts: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count, curPage: currentPageIndex)
     }
@@ -284,12 +283,13 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     func loadTranslationVC(animating: Bool) -> Void {
         
         self.clearReaderViewIfNeed()
-        self.translationVC = DUAtranslationControllerExt()
-        self.translationVC?.delegate = self
-        self.translationVC?.allowAnimating = animating
-        self.addChildViewController(self.translationVC!)
-        self.translationVC?.didMove(toParentViewController: self)
-        self.view.addSubview(self.translationVC!.view)
+        let translationVC = DUAtranslationControllerExt()
+        translationVC.delegate = self
+        translationVC.allowAnimating = animating
+        self.addChildViewController(translationVC)
+        translationVC.didMove(toParentViewController: self)
+        self.view.addSubview(translationVC.view)
+        self.translationVC = translationVC
     }
     
     private func loadPage(pageIndex: Int) -> Void {
@@ -301,7 +301,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             }
             self.pageVC?.setViewControllers([page!], direction: .forward, animated: false, completion: nil)
         case .vertical:
-            print("load table view page")
             tableView?.dataArray.removeAll()
             tableView?.dataArray = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
             self.tableView?.cellIndex = pageIndex
@@ -311,10 +310,10 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             
             self.tableView?.isReloading = true
             self.tableView?.reloadData()
-            self.tableView?.scrollToRow(at: IndexPath.init(row: tableView!.cellIndex, section: 0), at: UITableViewScrollPosition.top, animated: false)
+            self.tableView?.scrollToRow(at: IndexPath.init(row: tableView?.cellIndex ?? 0, section: 0), at: UITableViewScrollPosition.top, animated: false)
             self.tableView?.isReloading = false
             
-            self.statusBarForTableView?.totalPageCounts = (tableView?.dataArray.count)!
+            self.statusBarForTableView?.totalPageCounts = (tableView?.dataArray.count) ?? 0
             self.statusBarForTableView?.curPageIndex = currentPageIndex
             
             /// 当加载的页码为最后一页，需要手动触发一次下一章的请求
@@ -322,44 +321,38 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
                 self.requestNextChapterForTableView()
             }
         case .horizontal:
-            let page = self.getPageVCWith(pageIndex: pageIndex, chapterIndex: self.currentChapterIndex)
-            if page == nil {
-                return
-            }
-            self.translationVC?.setViewController(viewController: page!, direction: .left, animated: false, completionHandler: nil)
+            guard let page = self.getPageVCWith(pageIndex: pageIndex, chapterIndex: self.currentChapterIndex) else { return }
+            self.translationVC?.setViewController(viewController: page, direction: .left, animated: false, completionHandler: nil)
         case .none:
-            let page = self.getPageVCWith(pageIndex: pageIndex, chapterIndex: self.currentChapterIndex)
-            if page == nil {
-                return
-            }
-            self.translationVC?.setViewController(viewController: page!, direction: .left, animated: false, completionHandler: nil)
+            guard let page = self.getPageVCWith(pageIndex: pageIndex, chapterIndex: self.currentChapterIndex) else { return }
+            self.translationVC?.setViewController(viewController: page, direction: .left, animated: false, completionHandler: nil)
             
         }
     }
     
     private func loadBackgroundImage() -> Void {
-        var curPage: DUAPageViewController? = nil
         if config.scrollType == .curl {
-            curPage = pageVC?.viewControllers?.first as? DUAPageViewController
-            if curPage != nil {
-                let imageView = curPage?.view.subviews.first as! UIImageView
-                imageView.image = self.config.backgroundImage
+            if let curPage = pageVC?.viewControllers?.first as? DUAPageViewController {
+                if let imageView = curPage.view.subviews.first as? UIImageView {
+                    imageView.image = self.config.backgroundImage
+                }
             }
         }
+        
         if config.scrollType == .horizontal || config.scrollType == .none {
-            curPage = translationVC?.childViewControllers.first as? DUAPageViewController
-            if curPage != nil {
-                let imageView = curPage?.view.subviews.first as! UIImageView
-                imageView.image = self.config.backgroundImage
+            if let curPage = translationVC?.childViewControllers.first as? DUAPageViewController {
+                if let imageView = curPage.view.subviews.first as? UIImageView {
+                    imageView.image = self.config.backgroundImage
+                }
             }
-        }
-        let firstView = self.view.subviews.first as? UIImageView
-        if firstView != nil {
-            firstView?.image = self.config.backgroundImage
-        }else {
-            let imageView = UIImageView.init(frame: self.view.frame)
-            imageView.image = self.config.backgroundImage
-            self.view.insertSubview(imageView, at: 0)
+            
+            if let firstView = self.view.subviews.first as? UIImageView {
+                firstView.image = self.config.backgroundImage
+            } else {
+                let imageView = UIImageView.init(frame: self.view.frame)
+                imageView.image = self.config.backgroundImage
+                self.view.insertSubview(imageView, at: 0)
+            }
         }
     }
     
@@ -374,21 +367,19 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     }
     
     func clearReaderViewIfNeed() -> Void {
-        if self.pageVC != nil {
-            self.pageVC?.view.removeFromSuperview()
-            self.pageVC?.willMove(toParentViewController: nil)
-            self.pageVC?.removeFromParentViewController()
-        }
+        self.pageVC?.view.removeFromSuperview()
+        self.pageVC?.willMove(toParentViewController: nil)
+        self.pageVC?.removeFromParentViewController()
+        
         if self.tableView != nil {
             for item in self.view.subviews {
                 item.removeFromSuperview()
             }
         }
-        if self.translationVC != nil {
-            self.translationVC?.view.removeFromSuperview()
-            self.translationVC?.willMove(toParentViewController: nil)
-            self.translationVC?.removeFromParentViewController()
-        }
+        
+        self.translationVC?.view.removeFromSuperview()
+        self.translationVC?.willMove(toParentViewController: nil)
+        self.translationVC?.removeFromParentViewController()
     }
     
     /// MARK:--数据处理
@@ -401,12 +392,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     ///   - chapterIndex: 章节索引
     /// - Returns: 单个page页面
     private func getPageVCWith(pageIndex: Int, chapterIndex: Int) -> DUAPageViewController? {
-        let page = DUAPageViewController()
-        page.index = pageIndex
-        page.chapterBelong = chapterIndex
-        if self.config.backgroundImage != nil {
-            page.backgroundImage = self.config.backgroundImage
-        }
+ 
         let dtLabel = DUAAttributedView.init(frame: CGRect(x: 0, y: config.contentFrame.origin.y, width: self.view.width, height: config.contentFrame.height))
         dtLabel.edgeInsets = UIEdgeInsets.init(top: 0, left: config.contentFrame.origin.x, bottom: 0, right: config.contentFrame.origin.x)
         
@@ -414,9 +400,21 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         if pageArray.isEmpty {
             return nil
         }
-        let pageModel = pageArray[pageIndex]
+        var fixedPageIndex = pageIndex
+        if fixedPageIndex == pageArray.count {
+            print("-----出现错误了-----")
+            fixedPageIndex -= 1
+        }
+        let pageModel = pageArray[fixedPageIndex]
         dtLabel.attributedString = pageModel.attributedString
         dtLabel.backgroundColor = UIColor.clear
+        
+        let page = DUAPageViewController()
+        page.index = fixedPageIndex
+        page.chapterBelong = chapterIndex
+        if self.config.backgroundImage != nil {
+            page.backgroundImage = self.config.backgroundImage
+        }
         page.view.addSubview(dtLabel)
     
         self.addStatusBarTo(view: page.view, totalCounts: pageArray.count, curPage: pageIndex)
@@ -487,7 +485,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             let indexPath = IndexPath(row: index, section: 0)
             indexPathsToInsert.append(indexPath)
         }
-        self.tableView?.dataArray = lastPages + (self.tableView?.dataArray)!
+        self.tableView?.dataArray = lastPages + (self.tableView?.dataArray ?? [])
         self.tableView?.beginUpdates()
         self.tableView?.insertRows(at: indexPathsToInsert, with: .top)
         self.tableView?.endUpdates()
@@ -515,7 +513,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         }
         var indexPathsToInsert: [IndexPath] = []
         for (index, _) in nextPages.enumerated() {
-            let indexPath = IndexPath(row: (tableView?.dataArray.count)! + index, section: 0)
+            let indexPath = IndexPath(row: (tableView?.dataArray.count ?? 0) + index, section: 0)
             indexPathsToInsert.append(indexPath)
         }
         self.tableView?.dataArray += nextPages
@@ -549,8 +547,8 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     
     private func forwardCacheWith(chapter: DUAChapterModel) -> Void {
         var pageArray: [DUAPageModel] = []
-        let attrString = self.dataParser.attributedStringFromChapterModel(chapter: chapter, config: self.config)
-        self.dataParser.cutPageWith(attrString: attrString!, config: self.config, completeHandler: {
+        guard let attrString = self.dataParser.attributedStringFromChapterModel(chapter: chapter, config: self.config) else { return }
+        self.dataParser.cutPageWith(attrString: attrString, config: self.config, completeHandler: {
             (completedPageCounts, page, completed) -> Void in
             pageArray.append(page)
             if completed {
@@ -593,8 +591,9 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             self?.loadBackgroundImage()
         }
         self.config.didScrollTypeChanged = {[weak self] (DUAReaderScrollType) in
-            self?.loadReaderView()
-            self?.loadPage(pageIndex: self!.currentPageIndex)
+            guard let self = self else { return }
+            self.loadReaderView()
+            self.loadPage(pageIndex: self.currentPageIndex)
         }
     }
     
@@ -602,10 +601,11 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         isReCutPage = true
         if prePageStartLocation == -1 {
             let pageArray = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
-            prePageStartLocation = (pageArray[currentPageIndex].range?.location)!
+            prePageStartLocation = (pageArray[currentPageIndex].range?.location) ?? 0
         }
-        let chapter = chapterModels[String(currentChapterIndex)]
-        self.readWith(chapter: chapter!, pageIndex: currentPageIndex)
+        if let chapter = chapterModels[String(currentChapterIndex)] {
+            self.readWith(chapter: chapter, pageIndex: currentPageIndex)
+        }
     }
     
     // MARK:--PageVC Delegate
@@ -615,8 +615,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         struct FirstPage {
             static var arrived = false
         }
-        if viewController is DUAPageViewController {
-            let page = viewController as! DUAPageViewController
+        if let page = viewController as? DUAPageViewController {
             let backPage = DUABackViewController()
             var nextIndex = page.index - 1
             if nextIndex < 0 {
@@ -641,23 +640,23 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             backPage.grabViewController(viewController: self.getPageVCWith(pageIndex: nextIndex, chapterIndex: page.chapterBelong)!)
             return backPage
         }
-        let back = viewController as! DUABackViewController
-        if FirstPage.arrived {
-            FirstPage.arrived = false
+        if let back = viewController as? DUABackViewController {
+            if FirstPage.arrived {
+                FirstPage.arrived = false
+            }
             return self.getPageVCWith(pageIndex: back.index, chapterIndex: back.chapterBelong)
         }
-        return self.getPageVCWith(pageIndex: back.index, chapterIndex: back.chapterBelong)
+        return nil
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        print("向后翻页")
+        print("向后翻页!!!!")
         struct LastPage {
             static var arrived = false
         }
         let nextIndex: Int
         let pageArray = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
-        if viewController is DUAPageViewController {
-            let page = viewController as! DUAPageViewController
+        if let page = viewController as? DUAPageViewController {
             nextIndex = page.index + 1
             if nextIndex == pageArray.count {
                 LastPage.arrived = true
@@ -666,6 +665,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             backPage.grabViewController(viewController: page)
             return backPage
         }
+        
         if LastPage.arrived {
             LastPage.arrived = false
             if currentChapterIndex + 1 > totalChapterModels.count {
@@ -681,31 +681,34 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             }
             return nextPage
         }
-        let back = viewController as! DUABackViewController
-        return self.getPageVCWith(pageIndex: back.index + 1, chapterIndex: back.chapterBelong)
+        if let back = viewController as? DUABackViewController {
+            return self.getPageVCWith(pageIndex: back.index + 1, chapterIndex: back.chapterBelong)
+        }
+        return nil
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        
-        self.containerController(type: 0, currentController: pageViewController.viewControllers!.first!, didFinishedTransition: completed, previousController: previousViewControllers.first!)
+        if let currentVC = pageViewController.viewControllers?.first, let previousVC = previousViewControllers.first {
+            self.containerController(type: 0, currentController: currentVC, didFinishedTransition: completed, previousController: previousVC)
+        }
     }
     
     func containerController(type: Int, currentController: UIViewController, didFinishedTransition finished: Bool, previousController: UIViewController) -> Void {
         prePageStartLocation = -1
-        let curPage = currentController as! DUAPageViewController
-        let previousPage = previousController as! DUAPageViewController
+        guard let curPage = currentController as? DUAPageViewController else { return }
+        guard let previousPage = previousController as? DUAPageViewController else { return }
         print("当前页面所在章节 \(curPage.chapterBelong) 先前页面所在章节 \(previousPage.chapterBelong)")
         
         currentPageIndex = curPage.index
         
         var didStepIntoLastChapter = false
         var didStepIntoNextChapter = false
-        if type == 0 {
-            didStepIntoLastChapter = (pageVC?.willStepIntoLastChapter)! && curPage.chapterBelong < previousPage.chapterBelong
-            didStepIntoNextChapter = (pageVC?.willStepIntoNextChapter)! && curPage.chapterBelong > previousPage.chapterBelong
-        }else {
-            didStepIntoLastChapter = (translationVC?.willStepIntoLastChapter)! && curPage.chapterBelong < previousPage.chapterBelong
-            didStepIntoNextChapter = (translationVC?.willStepIntoNextChapter)! && curPage.chapterBelong > previousPage.chapterBelong
+        if let pageVC = pageVC , type == 0 {
+            didStepIntoLastChapter = (pageVC.willStepIntoLastChapter) && curPage.chapterBelong < previousPage.chapterBelong
+            didStepIntoNextChapter = (pageVC.willStepIntoNextChapter) && curPage.chapterBelong > previousPage.chapterBelong
+        } else if let translationVC = translationVC {
+            didStepIntoLastChapter = (translationVC.willStepIntoLastChapter) && curPage.chapterBelong < previousPage.chapterBelong
+            didStepIntoNextChapter = (translationVC.willStepIntoNextChapter) && curPage.chapterBelong > previousPage.chapterBelong
         }
         
         if didStepIntoNextChapter {
@@ -766,29 +769,29 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.tableView!.dataArray.count
+        return self.tableView?.dataArray.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell: DUATableViewCell? = self.tableView?.dequeueReusableCell(withIdentifier: "dua.reader.cell") as? DUATableViewCell
-        if let subviews = cell?.contentView.subviews {
-            for item in subviews {
-                item.removeFromSuperview()
-            }
-        }
-        if cell == nil {
-            cell = DUATableViewCell.init(style: UITableViewCellStyle.default, reuseIdentifier: "dua.reader.cell")
+        guard let cell: DUATableViewCell = self.tableView?.dequeueReusableCell(withIdentifier: "dua.reader.cell") as? DUATableViewCell else { fatalError("cell 复用错误") }
+//        if let subviews = cell.contentView.subviews {
+//            for item in subviews {
+//                item.removeFromSuperview()
+//            }
+//        }
+//        cell = DUATableViewCell.init(style: UITableViewCellStyle.default, reuseIdentifier: "dua.reader.cell")
+//
+        if let pageModel = self.tableView?.dataArray[indexPath.row] {
+            cell.configCellWith(pageModel: pageModel, config: config)
         }
         
-        let pageModel = self.tableView?.dataArray[indexPath.row]
-        cell?.configCellWith(pageModel: pageModel!, config: config)
         
-        return cell!
+        return cell
     }
     
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if tableView!.isReloading {
+        if tableView?.isReloading ?? false {
             return
         }
         if scrollView.contentOffset.y <= 0 {
@@ -850,13 +853,12 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     
     // MARK: DUATranslationController Delegate
     
-    func translationController(translationController: DUAtranslationController, controllerAfter controller: UIViewController) -> UIViewController? {
-        print("向后翻页")
+    func translationController(translationController: DUAtranslationController, controllerAfter controller: UIViewController?) -> UIViewController? {
+        print("向后翻页~~~~~")
         let nextIndex: Int
         var nextPage: DUAPageViewController? = nil
         let pageArray = self.pageArrayFromCache(chapterIndex: currentChapterIndex)
-        if controller is DUAPageViewController {
-            let page = controller as! DUAPageViewController
+        if let page = controller as? DUAPageViewController {
             nextIndex = page.index + 1
             if nextIndex == pageArray.count {
                 if currentChapterIndex + 1 > totalChapterModels.count {
@@ -879,12 +881,11 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         return nextPage
     }
     
-    func translationController(translationController: DUAtranslationController, controllerBefore controller: UIViewController) -> UIViewController? {
+    func translationController(translationController: DUAtranslationController, controllerBefore controller: UIViewController?) -> UIViewController? {
         
         print("向前翻页")
         var nextPage: DUAPageViewController? = nil
-        if controller is DUAPageViewController {
-            let page = controller as! DUAPageViewController
+        if let page = controller as? DUAPageViewController {
             var nextIndex = page.index - 1
             if nextIndex < 0 {
                 if currentChapterIndex <= 1 {
@@ -900,7 +901,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
                     pageHunger = true
                     return nil
                 }
-            }else {
+            } else {
                 nextPage = self.getPageVCWith(pageIndex: nextIndex, chapterIndex: page.chapterBelong)
             }
         }
@@ -908,13 +909,16 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         return nextPage
     }
     
-    func translationController(translationController: DUAtranslationController, willTransitionTo controller: UIViewController) {
+    func translationController(translationController: DUAtranslationController, willTransitionTo controller: UIViewController?) {
         print("willTransitionTo")
     }
     
-    func translationController(translationController: DUAtranslationController, didFinishAnimating finished: Bool, previousController: UIViewController, transitionCompleted completed: Bool)
+    func translationController(translationController: DUAtranslationController, didFinishAnimating finished: Bool, previousController: UIViewController?, transitionCompleted completed: Bool)
     {
-        self.containerController(type: 1, currentController: translationController.childViewControllers.first!, didFinishedTransition: completed, previousController: previousController)
+        if let vc = translationController.childViewControllers.first,
+           let previousController = previousController {
+            self.containerController(type: 1, currentController: vc, didFinishedTransition: completed, previousController: previousController)
+        }
     }
 
 }
