@@ -7,8 +7,8 @@
 //
 
 import UIKit
-import YYText
 import SnapKit
+import DTCoreText
 
 class ReaderContentCell: UICollectionViewCell {
     var pageModel: DUAPageModel? {
@@ -17,20 +17,19 @@ class ReaderContentCell: UICollectionViewCell {
         }
     }
     
-    let contentTextView: YYTextView = {
-       let textView = YYTextView()
-        textView.isEditable = false
-        return textView
+    let contentLabel: DTAttributedLabel = {
+       let label = DTAttributedLabel()
+        return label
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.addSubview(contentTextView)
-        contentTextView.contentInset = UIEdgeInsets(top: 15, left: 15, bottom: -15, right: -15)
-        contentTextView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        contentView.addSubview(contentLabel)
+        contentLabel.snp.makeConstraints {
+            $0.width.equalTo(Setting.readerContentBounds.width)
+            $0.centerX.equalToSuperview()
+            $0.top.bottom.equalToSuperview()
         }
-        contentTextView.backgroundColor = .orange
     }
     
     required init?(coder: NSCoder) {
@@ -39,6 +38,6 @@ class ReaderContentCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        contentTextView.attributedText = pageModel?.attributedString
+        contentLabel.attributedString = pageModel?.attributedString
     }
 }

@@ -103,31 +103,34 @@ class DUATextDataParser {
     }
     
     func cutPageWith(attrString: NSAttributedString, config: DUAConfiguration, completeHandler: (Int, DUAPageModel, Bool) -> Void) -> Void {
-        let layouter = DTCoreTextLayouter.init(attributedString: attrString)
-        let rect = CGRect(x: config.contentFrame.origin.x, y: config.contentFrame.origin.y, width: config.contentFrame.size.width, height: config.contentFrame.size.height)
-        var frame = layouter?.layoutFrame(with: rect, range: NSRange(location: 0, length: attrString.length))
-        
-        var pageVisibleRange = frame?.visibleStringRange()
-        var rangeOffset = pageVisibleRange!.location + pageVisibleRange!.length
-        var count = 1
-        
-        while rangeOffset <= attrString.length && rangeOffset != 0 {
-            let pageModel = DUAPageModel.init()
-            pageModel.attributedString = attrString.attributedSubstring(from: pageVisibleRange!)
-            pageModel.range = pageVisibleRange
-            pageModel.pageIndex = count - 1
-            
-            frame = layouter?.layoutFrame(with: rect, range: NSRange(location: rangeOffset, length: attrString.length - rangeOffset))
-            pageVisibleRange = frame?.visibleStringRange()
-            if pageVisibleRange == nil {
-                rangeOffset = 0
-            }else {
-                rangeOffset = pageVisibleRange!.location + pageVisibleRange!.length
+
+        let layouter = DTCoreTextLayouter(attributedString: attrString)
+        var location = 0
+        var length = attrString.length
+        var pageIndex = 0
+        while length > 0 && location < attrString.length {
+            let range = NSRange(location: location, length: length)
+            let layouterFrame = layouter?.layoutFrame(with: Setting.readerContentBounds, range: range)
+             
+            if let pageStringRange = layouterFrame?.visibleStringRange() {
+                let pageString = attrString.attributedSubstring(from: pageStringRange)
+                let pageModel = DUAPageModel.init()
+                pageModel.attributedString = pageString
+                pageModel.pageIndex = pageIndex
+                pageModel.range = pageStringRange
+                
+                pageIndex += 1
+                location = pageStringRange.location + pageStringRange.length
+                length = attrString.length - location
+                
+                if length <= 0 || location >= attrString.length {
+                    completeHandler(pageIndex-1, pageModel, true)
+                } else {
+                    completeHandler(pageIndex-1, pageModel, false)
+                }
+            } else {
+                length = 0
             }
-            
-            let completed = (rangeOffset <= attrString.length && rangeOffset != 0) ? false : true
-            completeHandler(count, pageModel, completed)
-            count += 1
         }
     }
     

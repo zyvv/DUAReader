@@ -22,7 +22,8 @@ protocol DUAReaderDelegate: NSObjectProtocol {
     
 }
 
-class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewControllerDataSource, UIGestureRecognizerDelegate, UITableViewDataSource, UITableViewDelegate, DUATranslationProtocol {
+class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewControllerDataSource, UIGestureRecognizerDelegate, DUATranslationProtocol {
+    
     /// 配置类
     public var config: DUAConfiguration!
     /// 代理
@@ -269,7 +270,7 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         layout.scrollDirection = scrollDirection
         layout.minimumLineSpacing = 0
         layout.sectionInset = .zero
-        layout.itemSize = CGSize(width: screenWidth, height: screenHeight)
+        layout.itemSize = CGSize(width: screenWidth, height: Setting.readerContentBounds.height)
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView?.showsVerticalScrollIndicator = false
         collectionView?.showsHorizontalScrollIndicator = false
@@ -280,20 +281,10 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         collectionView?.register(ReaderContentCell.self, forCellWithReuseIdentifier: "ReaderContentCell")
         view.addSubview(collectionView!)
         collectionView?.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.left.right.equalToSuperview()
+            $0.top.equalTo(view.safeAreaInsets.top)
+            $0.bottom.equalTo(view.safeAreaInsets.bottom)
         }
-        
-//        let tableView = DUATableView(frame: CGRect.init(x: 0, y: config.contentFrame.origin.y, width: UIScreen.main.bounds.size.width, height: config.contentFrame.size.height), style: .plain)
-//        tableView.dataSource = self
-//        tableView.delegate = self
-//        tableView.showsVerticalScrollIndicator = false
-//        tableView.separatorStyle = .none
-//        tableView.estimatedRowHeight = 0
-//        tableView.scrollsToTop = false
-//        tableView.backgroundColor = UIColor.clear
-//
-//        self.view.addSubview(tableView)
-//        self.tableView = tableView
         
         self.addStatusBarTo(view: self.view, totalCounts: self.pageArrayFromCache(chapterIndex: currentChapterIndex).count, curPage: currentPageIndex)
     }
@@ -451,11 +442,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
     
     private func cachePageArray(pageModels: [DUAPageModel], chapterIndex: Int) -> Void {
         self.chapterCaches[String(chapterIndex)] = pageModels
-///     for item in self.chapterCaches.keys {
-///         if Int(item)! - currentChapterIndex > 2 || Int(item)! - currentChapterIndex < -1 {
-///             self.chapterCaches.removeValue(forKey: item)
-///         }
-///     }
     }
     
     
@@ -531,16 +517,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
             self.postReaderStateNotification(state: .busy)
             return
         }
-//        var indexPathsToInsert: [IndexPath] = []
-//        for (index, _) in nextPages.enumerated() {
-//            let indexPath = IndexPath(row: (tableView?.dataArray.count ?? 0) + index, section: 0)
-//            indexPathsToInsert.append(indexPath)
-//        }
-//        self.tableView?.dataArray += nextPages
-//        self.tableView?.beginUpdates()
-//        self.tableView?.insertRows(at: indexPathsToInsert, with: .none)
-//        self.tableView?.endUpdates()
-        
         
         
         let fromItemIndex = currentChapterDataSource.count
@@ -793,35 +769,6 @@ class DUAReader: UIViewController, UIPageViewControllerDelegate, UIPageViewContr
         }
 
     }
-    
-    
-    // MARK:--Table View Delegate
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return config.contentFrame.height
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.tableView?.dataArray.count ?? 0
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell: DUATableViewCell = self.tableView?.dequeueReusableCell(withIdentifier: "dua.reader.cell") as? DUATableViewCell else { fatalError("cell 复用错误") }
-//        if let subviews = cell.contentView.subviews {
-//            for item in subviews {
-//                item.removeFromSuperview()
-//            }
-//        }
-//        cell = DUATableViewCell.init(style: UITableViewCellStyle.default, reuseIdentifier: "dua.reader.cell")
-//
-        if let pageModel = self.tableView?.dataArray[indexPath.row] {
-            cell.configCellWith(pageModel: pageModel, config: config)
-        }
-        
-        
-        return cell
-    }
-    
     
 //    func scrollViewDidScroll(_ scrollView: UIScrollView) {
 //        if tableView?.isReloading ?? false {

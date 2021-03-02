@@ -8,6 +8,7 @@
 
 import UIKit
 import Async
+import Defaults
 
 enum DUAReaderScrollType: Int {
     case curl
@@ -76,7 +77,48 @@ class DUAConfiguration: NSObject {
     
 }
 
-fileprivate extension UIScreen {
+struct Setting {
+
+    enum ReaderScrollType: String, Codable {
+        case curl = "curl"
+        case horizontal = "horizontal"
+        case vertical = "vertical"
+        case none = "none"
+    }
+    
+    enum ReaderContentInsetType: String, Codable {
+        case large = "InsetLarge"
+        case middle = "InsetMiddle"
+        case small = "InsetSmall"
+    }
+    
+    static var readerFontSize: Int {
+        get { return Defaults[.readerFontSize] }
+        set { Defaults[.readerFontSize] = newValue }
+    }
+    
+    static var readerContentInsetType: ReaderContentInsetType {
+        get { return Defaults[.readerContentInsetType] }
+        set { Defaults[.readerContentInsetType] = newValue }
+    }
+    
+    static var readerScrollType: ReaderScrollType {
+        get { return Defaults[.readerScrollType] }
+        set { Defaults[.readerScrollType] = newValue }
+    }
+    
+    static var readerContentBounds: CGRect = CGRect(x: 0, y: 0, width: screenWidth - 30, height: screenHeight - 30)
+}
+
+
+extension Defaults.Keys {
+    static let readerScrollType = Key<Setting.ReaderScrollType>("ReaderScrollType", default: .horizontal)
+    static let readerContentInsetType = Key<Setting.ReaderContentInsetType>("ReaderContentInsetType", default: .middle)
+    static let readerFontSize = Key<Int>("ReaderFontSize", default: 20)
+}
+
+
+extension UIScreen {
     static var topSpacing: CGFloat {
         
         let window = UIApplication.shared.keyWindow

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreText
 
 extension UIView {
 
@@ -117,5 +118,29 @@ extension UIView {
 }
 
 extension NSAttributedString {
+    func paging(with bounds: CGRect) -> [NSAttributedString] {
+        let mutableSelf = NSMutableAttributedString(attributedString: self)
+        var pagingStrings: [NSAttributedString] = []
+        while mutableSelf.length > 0 {
+            let path = CGPath(rect: CGRect(origin: .zero, size: bounds.size), transform: nil)
+            let frameSetter = CTFramesetterCreateWithAttributedString(mutableSelf)
+            let frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, mutableSelf.length), path, nil)
+            let visibleStringRange = CTFrameGetVisibleStringRange(frame)
+            pagingStrings.append(mutableSelf.attributedSubstring(from: NSRange(location: 0, length: visibleStringRange.length)))
+            mutableSelf.deleteCharacters(in: NSRange(location: 0, length: visibleStringRange.length))
+        }
+        return pagingStrings
+    }
     
+    func paging(with bounds: CGRect, range: NSRange) -> NSAttributedString? {
+        if self.length > 0 {
+            let path = CGPath(rect: CGRect(origin: .zero, size: bounds.size), transform: nil)
+            let frameSetter = CTFramesetterCreateWithAttributedString(self)
+            let frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(range.location, range.length), path, nil)
+            let visibleStringRange = CTFrameGetVisibleStringRange(frame)
+            
+            return self.attributedSubstring(from: NSRange(location: 0, length: visibleStringRange.length))
+        }
+        return nil
+    }
 }

@@ -14,7 +14,8 @@ def pods
     pod 'Defaults'
     pod 'PanModal'
     pod 'DTCoreText'
-    pod 'YYText'
+#    pod 'YYText'
+    pod 'Defaults'
 end
 
 target :'DUAReader' do
